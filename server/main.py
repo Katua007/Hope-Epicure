@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import models
 from database import SessionLocal, engine, get_db
+from mailer import send_order_notification
 
 app = FastAPI(title="Hope Epicure API")
 
@@ -51,3 +52,15 @@ def create_product(product_data: dict, db: Session = Depends(get_db)):
     db.refresh(new_product)
     return new_product
 
+@app.post("/orders")
+def place_order(order_data: dict, db: Session = Depends(get_db)):
+    # 1. Save to Database
+    new_order = models.Order(**order_data)
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
+    
+    # 2. Trigger Email to Hope
+    send_order_notification(order_data)
+    
+    return {"message": "Order placed successfully!", "order_id": new_order.id}
