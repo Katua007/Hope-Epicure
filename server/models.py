@@ -12,3 +12,15 @@ class Product(Base):
     flavor = Column(String)
     image_url = Column(String)
     is_available = Column(Boolean, default=True)
+
+# Add this to your existing models.py
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_name = Column(String)
+    customer_email = Column(String)
+    product_name = Column(String)
+    flavor = Column(String)
+    quantity = Column(Integer)
+    status = Column(String, default="Pending") # Pending, Completed, Cancelled
