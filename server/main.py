@@ -1,7 +1,8 @@
 # backend/main.py
-from fastapi import FastAPI, HTTPException
-from models import Product
-from typing import List
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+import models
+from database import SessionLocal, engine, get_db
 
 app = FastAPI(title="Hope Epicure API")
 
@@ -32,3 +33,21 @@ def update_availability(product_id: int, available: bool):
             p.is_available = available
             return p
     raise HTTPException(status_code=404, detail="Product not found")
+
+# Create the database tables
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Hope Epicure API")
+
+@app.get("/products")
+def get_products(db: Session = Depends(get_db)):
+    return db.query(models.Product).all()
+
+@app.post("/products")
+def create_product(product_data: dict, db: Session = Depends(get_db)):
+    new_product = models.Product(**product_data)
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+    return new_product
+
