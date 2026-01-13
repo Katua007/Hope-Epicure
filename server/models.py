@@ -1,12 +1,14 @@
 # backend/models.py
-from pydantic import BaseModel
-from typing import Optional
+from sqlalchemy import Column, Integer, String, Float, Boolean
+from database import Base
 
-class Product(BaseModel):
-    id: Optional[int] = None
-    name: str
-    description: str
-    price: float
-    flavor: str
-    image_url: str
-    is_available: bool = True
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String)
+    price = Column(Float)
+    flavor = Column(String)
+    image_url = Column(String)
+    is_available = Column(Boolean, default=True)
