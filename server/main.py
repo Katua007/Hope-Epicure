@@ -64,3 +64,14 @@ def place_order(order_data: dict, db: Session = Depends(get_db)):
     send_order_notification(order_data)
     
     return {"message": "Order placed successfully!", "order_id": new_order.id}
+
+# Add this endpoint to your main.py
+@app.delete("/products/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    db.delete(db_product)
+    db.commit()
+    return {"message": "Product deleted successfully"}
