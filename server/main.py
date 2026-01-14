@@ -5,6 +5,8 @@ import models
 from database import SessionLocal, engine, get_db
 from mailer import send_order_notification
 from auth import hash_password, verify_password, create_access_token
+from fastapi import UploadFile, File, Form
+from cloudinary_config import upload_image
 
 app = FastAPI(title="Hope Epicure API")
 
@@ -126,3 +128,24 @@ def place_order(order_data: dict, db: Session = Depends(get_db)):
         print(f"Email failed but order saved: {e}")
 
     return {"status": "success", "message": "Hope has been notified!"}
+
+@app.post("/products")
+async def create_product(
+    name: str = Form(...),
+    price: float = Form(...),
+    flavor: str = Form(...),
+    description: str = Form(...),
+    image: UploadFile = File(...), # Receives the actual image file
+    db: Session = Depends(get_db)
+):
+    # 1. Upload the file to Cloudinary
+    image_url = upload_image(image.file)
+    
+    # 2. Save the product with the new URL to our DB
+    new_product = models.Product(
+        name=name, price=price, flavor=flavor, 
+        description=description, image_url=image_url
+    )
+    db.add(new_product)
+    db.commit()
+    return new_product
