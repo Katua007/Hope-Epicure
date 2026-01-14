@@ -1,6 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { fetchProducts, toggleAvailability } from '../api';
+import { fetchProducts, toggleAvailability, deleteProduct } from '../api';
 import AdminProductForm from '../components/AdminProductForm';
+
+//  Add the handleDelete function inside the AdminDashboard component
+const handleDelete = async (id) => {
+  if (window.confirm("Are you sure you want to delete this product? This cannot be undone.")) {
+    try {
+      await deleteProduct(id);
+      loadProducts(); // Refresh the list
+    } catch (err) {
+      alert("Error deleting product");
+    }
+  }
+};
+
+//  Update the button in the JSX table:
+<button 
+  onClick={() => handleDelete(p.id)} 
+  className="text-red-500 hover:underline font-semibold"
+>
+  Delete
+</button>
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
