@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import models
 from database import SessionLocal, engine, get_db
 from mailer import send_order_notification
+from auth import hash_password, verify_password, create_access_token
 
 app = FastAPI(title="Hope Epicure API")
 
@@ -75,3 +76,31 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(db_product)
     db.commit()
     return {"message": "Product deleted successfully"}
+
+# 1. Signup Route
+@app.post("/auth/signup")
+def signup(user_data: dict, db: Session = Depends(get_db)):
+    # Check if user exists
+    existing_user = db.query(models.User).filter(models.User.email == user_data['email']).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Hash the password and save
+    new_user = models.User(
+        email=user_data['email'],
+        hashed_password=hash_password(user_data['password'])
+    )
+    db.add(new_user)
+    db.commit()
+    return {"message": "User created successfully"}
+
+# 2. Login Route
+@app.post("/auth/login")
+def login(user_data: dict, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == user_data['email']).first()
+    if not user or not verify_password(user_data['password'], user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Generate JWT
+    token = create_access_token(data={"sub": user.email})
+    return {"access_token": token, "token_type": "bearer", "email": user.email}
