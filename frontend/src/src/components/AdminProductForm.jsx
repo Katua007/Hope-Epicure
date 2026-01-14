@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
-import { createProduct } from '../api';
+import axios from 'axios';
 
 const AdminProductForm = ({ onProductAdded }) => {
+  const [file, setFile] = useState(null);
   const [formData, setFormData] = useState({
-    name: '', price: '', flavor: '', description: '', image_url: ''
+    name: '', price: '', flavor: '', description: ''
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await createProduct(formData);
-      onProductAdded(); // Refresh the list
-      setFormData({ name: '', price: '', flavor: '', description: '', image_url: '' });
-      alert("Product added successfully!");
-    } catch (err) {
-      console.error("Error adding product", err);
-    }
+    
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('price', formData.price);
+    data.append('flavor', formData.flavor);
+    data.append('description', formData.description);
+    data.append('image', file);
+
+    await axios.post('http://localhost:8000/products', data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    
+    onProductAdded();
+    setFormData({ name: '', price: '', flavor: '', description: '' });
+    setFile(null);
+    alert("Cake uploaded to the cloud!");
   };
 
   return (
@@ -28,8 +37,8 @@ const AdminProductForm = ({ onProductAdded }) => {
           value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
         <input type="text" placeholder="Flavor" className="border p-2 rounded" 
           value={formData.flavor} onChange={(e) => setFormData({...formData, flavor: e.target.value})} required />
-        <input type="text" placeholder="Image URL" className="border p-2 rounded" 
-          value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} required />
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} 
+          className="border p-2 rounded block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-50 file:text-pink-700" required />
         <textarea placeholder="Description" className="border p-2 rounded md:col-span-2" 
           value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
       </div>
