@@ -104,3 +104,25 @@ def login(user_data: dict, db: Session = Depends(get_db)):
     # Generate JWT
     token = create_access_token(data={"sub": user.email})
     return {"access_token": token, "token_type": "bearer", "email": user.email}
+
+@app.post("/orders")
+def place_order(order_data: dict, db: Session = Depends(get_db)):
+    # 1. Create the DB record
+    new_order = models.Order(
+        customer_name=order_data.get('customer_name', 'Member'),
+        customer_email=order_data['customer_email'],
+        product_name=order_data['product_name'],
+        flavor=order_data['flavor'],
+        quantity=order_data['quantity']
+    )
+    db.add(new_order)
+    db.commit()
+    
+    # 2. Notify Hope via Email
+    try:
+        from mailer import send_order_notification
+        send_order_notification(order_data)
+    except Exception as e:
+        print(f"Email failed but order saved: {e}")
+
+    return {"status": "success", "message": "Hope has been notified!"}
