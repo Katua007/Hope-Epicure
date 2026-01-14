@@ -8,10 +8,14 @@ SECRET_KEY = "SUPER_SECRET_HOPE_KEY" # In production, use an env variable
 ALGORITHM = "HS256"
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    # Truncate password to 72 bytes for bcrypt compatibility
+    password_bytes = password.encode('utf-8')[:72]
+    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # Truncate password to 72 bytes for bcrypt compatibility
+    password_bytes = plain_password.encode('utf-8')[:72]
+    return pwd_context.verify(password_bytes.decode('utf-8', errors='ignore'), hashed_password)
 
 def create_access_token(data: dict):
     to_encode = data.copy()

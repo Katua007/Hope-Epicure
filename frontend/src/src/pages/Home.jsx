@@ -1,32 +1,39 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { fetchProducts } from '../api';
-import { AuthContext } from '../context/AuthContext'; // Import Context
+import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import OrderModal from '../components/OrderModal';
+import Navbar from '../components/Navbar';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  const { user } = useContext(AuthContext); // Get logged-in user
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     const getActiveProducts = async () => {
-      const res = await fetchProducts();
-      setProducts(res.data.filter(p => p.is_available));
+      try {
+        setLoading(true);
+        const res = await fetchProducts();
+        setProducts(res.data.filter(p => p.is_available));
+      } catch (err) {
+        console.error("Failed to load products", err);
+      } finally {
+        setLoading(false);
+      }
     };
     getActiveProducts();
   }, []);
 
   const handleOrderClick = (product) => {
     if (!user) {
-      // If not logged in, go to login page
       navigate('/login');
     } else {
-      // If logged in, open the modal
       setSelectedProduct(product);
       setIsModalOpen(true);
     }
@@ -34,24 +41,33 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-pink-50">
-      <header className="py-12 text-center bg-white shadow-sm">
-        <h1 className="text-5xl font-extrabold text-pink-600">Hope Epicure</h1>
-        {user ? (
-          <p className="mt-2 text-gray-600">Welcome back, {user.email}!</p>
-        ) : (
-          <p className="mt-2 text-gray-400">Log in to start ordering!</p>
-        )}
+      <Navbar />
+      
+      <header className="py-12 text-center bg-gradient-to-r from-pink-500 to-pink-600 text-white">
+        <h1 className="text-5xl font-extrabold mb-2">Our Delicious Products</h1>
+        <p className="text-lg">Handcrafted with love, baked to perfection</p>
       </header>
 
-      <main className="max-w-6xl mx-auto p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {products.map(p => (
-            <ProductCard key={p.id} product={p} onOrder={handleOrderClick} />
-          ))}
-        </div>
+      <main className="max-w-7xl mx-auto p-8">
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+            <p className="mt-4 text-gray-600">Loading delicious treats...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-2xl text-gray-600">No products available at the moment.</p>
+            <p className="text-gray-500 mt-2">Check back soon for fresh treats!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map(p => (
+              <ProductCard key={p.id} product={p} onOrder={handleOrderClick} />
+            ))}
+          </div>
+        )}
       </main>
 
-      {/* The Order Modal */}
       {selectedProduct && (
         <OrderModal 
           product={selectedProduct} 

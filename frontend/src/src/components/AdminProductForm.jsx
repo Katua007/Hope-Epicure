@@ -10,21 +10,32 @@ const AdminProductForm = ({ onProductAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const data = new FormData();
-    data.append('name', formData.name);
-    data.append('price', formData.price);
-    data.append('flavor', formData.flavor);
-    data.append('description', formData.description);
-    data.append('image', file);
-
-    await axios.post('http://localhost:8000/products', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    if (!file) {
+      alert("Please select an image");
+      return;
+    }
     
-    onProductAdded();
-    setFormData({ name: '', price: '', flavor: '', description: '' });
-    setFile(null);
-    alert("Cake uploaded to the cloud!");
+    try {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('price', parseFloat(formData.price));
+      data.append('flavor', formData.flavor);
+      data.append('description', formData.description || '');
+      data.append('image', file);
+
+      await axios.post('http://localhost:8000/products', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      onProductAdded();
+      setFormData({ name: '', price: '', flavor: '', description: '' });
+      setFile(null);
+      e.target.reset();
+      alert("✅ Product added successfully!");
+    } catch (err) {
+      console.error("Error adding product", err);
+      alert("❌ Failed to add product: " + (err.response?.data?.detail || err.message));
+    }
   };
 
   return (
@@ -33,7 +44,7 @@ const AdminProductForm = ({ onProductAdded }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="Product Name" className="border p-2 rounded" 
           value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-        <input type="number" placeholder="Price ($)" className="border p-2 rounded" 
+        <input type="number" step="0.01" min="0" placeholder="Price ($)" className="border p-2 rounded" 
           value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
         <input type="text" placeholder="Flavor" className="border p-2 rounded" 
           value={formData.flavor} onChange={(e) => setFormData({...formData, flavor: e.target.value})} required />
