@@ -1,69 +1,8 @@
 INFO:     Will watch for changes in these directories: ['/home/cyril-katua/Documents/Development/Hope-Epicure/server']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [24224] using WatchFiles
-INFO:     Started server process [24228]
+INFO:     Started reloader process [6535] using WatchFiles
+INFO:     Started server process [6539]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:34928 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34928 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34932 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34932 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54844 - "OPTIONS /auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54858 - "POST /auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:33420 - "OPTIONS /auth/signup HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/home/cyril-katua/Documents/Development/Hope-Epicure/server/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:33430 - "POST /auth/signup HTTP/1.1" 500 Internal Server Error
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/home/cyril-katua/Documents/Development/Hope-Epicure/server/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:44480 - "POST /auth/signup HTTP/1.1" 500 Internal Server Error
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/home/cyril-katua/Documents/Development/Hope-Epicure/server/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:36474 - "POST /auth/signup HTTP/1.1" 500 Internal Server Error
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/home/cyril-katua/Documents/Development/Hope-Epicure/server/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:53298 - "POST /auth/signup HTTP/1.1" 500 Internal Server Error
-WARNING:  WatchFiles detected changes in 'auth.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [24228]
-INFO:     Started server process [24522]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:37000 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37000 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57966 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57966 - "GET /products HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52242 - "POST /products HTTP/1.1" 422 Unprocessable Entity
-WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [24522]
-INFO:     Started server process [24729]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/home/cyril-katua/Documents/Development/Hope-Epicure/server/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:51252 - "POST /auth/signup HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:40214 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59552 - "GET /products HTTP/1.1" 200 OK
