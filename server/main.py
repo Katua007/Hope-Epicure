@@ -1,4 +1,4 @@
-# backend/main.py
+import os
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
@@ -12,10 +12,16 @@ from schemas import Product, ProductCreate, OrderCreate, UserCreate, Token
 
 app = FastAPI(title="Hope Epicure API")
 
+# Get allowed origins from environment or use defaults
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174"
+).split(",")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"],
+    allow_origins=ALLOWED_ORIGINS + ["*"],  # Allow all in production, configure properly later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
