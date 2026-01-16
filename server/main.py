@@ -105,15 +105,20 @@ def place_order(order_data: OrderCreate, db: Session = Depends(get_db)):
 @app.post("/auth/signup")
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     try:
+        # Validate input
+        if not user_data.email or not user_data.password:
+            raise HTTPException(status_code=400, detail="Email and password required")
+        
         # Check if user exists
         existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
 
         # Hash the password and save
+        hashed_pwd = hash_password(user_data.password)
         new_user = models.User(
             email=user_data.email,
-            hashed_password=hash_password(user_data.password)
+            hashed_password=hashed_pwd
         )
         db.add(new_user)
         db.commit()
@@ -123,14 +128,26 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Signup failed: {str(e)}")
+        print(f"Signup error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Signup failed. Please try again.")
 
 @app.post("/auth/login", response_model=Token)
 def login(user_data: dict, db: Session = Depends(get_db)):
     try:
-        user = db.query(models.User).filter(models.User.email == user_data['email']).first()
-        if not user or not verify_password(user_data['password'], user.hashed_password):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+        email = user_data.get('email')
+        password = user_data.get('password')
+        
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Email and password required")
+        
+        user = db.query(models.User).filter(models.User.email == email).first()
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        if not verify_password(password, user.hashed_password):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
 
         # Generate JWT
         token = create_access_token(data={"sub": user.email})
@@ -138,4 +155,5 @@ def login(user_data: dict, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"Login error: {e}")
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
