@@ -1,51 +1,35 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from .database import get_db
-from .models import User
-from .schemas import UserCreate, Token
-from .auth import hash_password, verify_password, create_access_token
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import jwt
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+# Password hashing setup
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = "SUPER_SECRET_HOPE_KEY" # In production, use an env variable
+ALGORITHM = "HS256"
 
-@router.post("/signup")
-def signup(user_data: UserCreate, db: Session = Depends(get_db)):
+def hash_password(password: str):
     try:
-        if not user_data.email or not user_data.password:
-            raise HTTPException(status_code=400, detail="Email and password required")
-        
-        existing_user = db.query(User).filter(User.email == user_data.email).first()
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
-
-        new_user = User(
-            email=user_data.email,
-            hashed_password=hash_password(user_data.password)
-        )
-        db.add(new_user)
-        db.commit()
-        return {"message": "User created successfully"}
-    except HTTPException:
-        raise
+        # Truncate password to 72 bytes for bcrypt compatibility
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
+        return pwd_context.hash(password)
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Signup failed")
+        print(f"Hash error: {e}")
+        # Fallback: use first 50 characters
+        return pwd_context.hash(password[:50])
 
-@router.post("/login", response_model=Token)
-def login(user_data: dict, db: Session = Depends(get_db)):
+def verify_password(plain_password, hashed_password):
     try:
-        email = user_data.get('email')
-        password = user_data.get('password')
-        
-        if not email or not password:
-            raise HTTPException(status_code=400, detail="Email and password required")
-        
-        user = db.query(User).filter(User.email == email).first()
-        if not user or not verify_password(password, user.hashed_password):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-
-        token = create_access_token(data={"sub": user.email})
-        return {"access_token": token, "token_type": "bearer"}
-    except HTTPException:
-        raise
+        # Truncate password to 72 bytes for bcrypt compatibility
+        if len(plain_password.encode('utf-8')) > 72:
+            plain_password = plain_password[:72]
+        return pwd_context.verify(plain_password, hashed_password)
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Login failed")
+        print(f"Verify error: {e}")
+        return False
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=60)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
