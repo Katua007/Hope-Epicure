@@ -1,12 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { fetchProducts, toggleAvailability, deleteProduct } from '../api';
 import AdminProductForm from '../components/AdminProductForm';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || !user.is_admin) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   const loadProducts = async () => {
     try {

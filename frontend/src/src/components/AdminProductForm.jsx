@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 const AdminProductForm = ({ onProductAdded }) => {
@@ -23,7 +23,7 @@ const AdminProductForm = ({ onProductAdded }) => {
       data.append('description', formData.description || '');
       data.append('image', file);
 
-      await axios.post('http://localhost:8000/products', data, {
+      await axios.post('/api/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       

@@ -1,11 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 from sqlalchemy.orm import Session
 from typing import List
 import os
 
 # Import all modules
-from database import get_db
+from database import get_db, create_tables
 from models import Product as ProductModel, Order as OrderModel, User as UserModel
 from schemas import Product, Order, OrderCreate, User, UserCreate, UserLogin
 from cloudinary_config import upload_image
@@ -13,6 +15,19 @@ from mailer import send_order_notification
 from auth import get_password_hash, verify_password, create_access_token
 
 app = FastAPI(title="Hope Epicure API")
+
+class StripApiPrefixMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        path = request.scope["path"]
+        if path.startswith("/api"):
+            request.scope["path"] = path[4:] or "/"
+        return await call_next(request)
+
+app.add_middleware(StripApiPrefixMiddleware)
+
+@app.on_event("startup")
+def on_startup():
+    create_tables()
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,7 +109,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "email": db_user.email,
+        "is_admin": db_user.is_admin,
+    }
 
 # Orders endpoint
 @app.post("/orders", response_model=Order)

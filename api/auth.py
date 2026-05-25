@@ -7,7 +7,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "SUPER_SECRET_HOPE_KEY" # In production, use an env variable
 ALGORITHM = "HS256"
 
-def hash_password(password: str):
+def get_password_hash(password: str):
     try:
         # Truncate password to 72 bytes for bcrypt compatibility
         if len(password.encode('utf-8')) > 72:
