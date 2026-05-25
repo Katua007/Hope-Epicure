@@ -3,8 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Use PostgreSQL for production, SQLite for development
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./hope_bakery.db")
+# Use PostgreSQL for production, SQLite (in /tmp — the only writable dir on Vercel) for dev
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////tmp/hope_bakery.db")
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)

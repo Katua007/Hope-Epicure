@@ -17,6 +17,9 @@ from cloudinary_config import upload_image
 from mailer import send_order_notification
 from auth import get_password_hash, verify_password, create_access_token
 
+# Create tables at import time so they exist on every Vercel cold start
+create_tables()
+
 app = FastAPI(title="Hope Epicure API")
 
 class StripApiPrefixMiddleware(BaseHTTPMiddleware):
