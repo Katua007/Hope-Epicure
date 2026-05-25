@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { placeOrder } from '../api';
 
 const OrderModal = ({ product, isOpen, onClose, userEmail }) => {

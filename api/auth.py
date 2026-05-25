@@ -1,10 +1,10 @@
+import os
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
 
-# Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = "SUPER_SECRET_HOPE_KEY" # In production, use an env variable
+SECRET_KEY = os.getenv("SECRET_KEY", "SUPER_SECRET_HOPE_KEY")
 ALGORITHM = "HS256"
 
 def get_password_hash(password: str):

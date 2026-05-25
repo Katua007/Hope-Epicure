@@ -97,13 +97,27 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     hashed_password = get_password_hash(user.password)
-    new_user = UserModel(email=user.email, hashed_password=hashed_password)
+    # is_admin is always False on normal signup regardless of what was sent
+    new_user = UserModel(email=user.email, hashed_password=hashed_password, is_admin=False)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@app.post("/auth/make-admin")
+def make_admin(email: str, admin_secret: str, db: Session = Depends(get_db)):
+    """Promote an existing user to admin. Requires the ADMIN_SECRET env variable."""
+    expected_secret = os.getenv("ADMIN_SECRET", "")
+    if not expected_secret or admin_secret != expected_secret:
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+    db_user = db.query(UserModel).filter(UserModel.email == email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.is_admin = True
+    db.commit()
+    return {"message": f"{email} is now an admin"}
 
 @app.post("/auth/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -127,14 +141,16 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
         db.add(new_order)
         db.commit()
         db.refresh(new_order)
-        
-        # Send email notification
-        send_order_notification(new_order)
-        
-        return new_order
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+    try:
+        send_order_notification(new_order)
+    except Exception:
+        pass  # Email failure must not cancel a successfully placed order
+
+    return new_order
 
 # Vercel handler
 handler = app

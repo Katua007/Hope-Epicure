@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { signup, login } from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -17,8 +17,8 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         const res = await login({ email, password });
-        saveUser(res.data);
-        navigate('/products');
+        saveUser({ email: res.data.email, is_admin: res.data.is_admin, access_token: res.data.access_token });
+        navigate(res.data.is_admin ? '/admin' : '/products');
       } else {
         await signup({ email, password });
         alert("Account created successfully! Please login.");

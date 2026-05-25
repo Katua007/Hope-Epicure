@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -23,9 +23,11 @@ const Navbar = () => {
             <Link to="/" className="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">
               Home
             </Link>
-            <Link to="/admin" className="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">
-              Admin
-            </Link>
+            {user?.is_admin && (
+              <Link to="/admin" className="text-gray-700 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium">
+                Admin
+              </Link>
+            )}
             
             {user ? (
               <div className="flex items-center space-x-4">
