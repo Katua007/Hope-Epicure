@@ -1,10 +1,13 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
+
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from sqlalchemy.orm import Session
 from typing import List
-import os
 
 # Import all modules
 from database import get_db, create_tables
