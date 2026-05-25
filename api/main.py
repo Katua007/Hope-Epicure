@@ -13,9 +13,19 @@ from typing import List
 from database import get_db, create_tables
 from models import Product as ProductModel, Order as OrderModel, User as UserModel
 from schemas import Product, Order, OrderCreate, User, UserCreate, UserLogin
-from cloudinary_config import upload_image
-from mailer import send_order_notification
 from auth import get_password_hash, verify_password, create_access_token
+
+try:
+    from cloudinary_config import upload_image
+except Exception as _e:
+    def upload_image(_f):
+        raise HTTPException(status_code=500, detail=f"Image upload not configured: {_e}")
+
+try:
+    from mailer import send_order_notification
+except Exception:
+    def send_order_notification(_o):
+        pass  # Email not configured — silently skip
 
 # Create tables at import time so they exist on every Vercel cold start
 create_tables()
